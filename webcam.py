@@ -17,12 +17,14 @@ def process(dev_num):
   camera.set(cv.CAP_PROP_FRAME_HEIGHT, 480)
   ret, image = camera.read()
   while ret:
-    if (cv.waitKey(10) & 0xFF) in [ord('q'), ord('Q'), 27]:
+    if (cv.waitKey(1) & 0xFF) in [ord('q'), ord('Q'), 27]:
       break
     original = img_as_float(image)
     sigma = 0.155
     noisy = random_noise(original, var=sigma**2)
-    cv.imshow('Webcam', np.concatenate((image, img_as_ubyte(noisy)), axis=1))
+    denoisy = denoise_tv_chambolle(noisy, weight=0.1, multichannel=True)
+    result = np.concatenate((image, img_as_ubyte(noisy), img_as_ubyte(denoisy)), axis=1)
+    cv.imshow('Webcam', result)
     ret, image = camera.read()
   cv.destroyAllWindows()
 
